@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Employee Registration</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, Helvetica, sans-serif;}
+body{min-height:100vh;background:#f2f5f9;display:flex;justify-content:center;align-items:center;}
+.form-box{width:90%;max-width:500px;background:white;padding:25px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.15);}
+.form-box h2{text-align:center;margin-bottom:20px;color:#333;font-size:24px;}
+.input-group{margin-bottom:15px;position:relative;}
+.input-group textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;resize:none;box-sizing:border-box;}
+.input-group input, .input-group select{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;}
+.input-group input:focus, .input-group select:focus{border-color:#4CAF50;outline:none;}
+.btn{width:100%;padding:12px;background:#4CAF50;border:none;color:white;font-size:16px;border-radius:6px;cursor:pointer;margin-top:8px;}
+.btn:hover{background:#3d9140;}
+.error-msg{color:red;font-size:13px;margin-top:3px;position:absolute;bottom:-18px;left:0;}
+.success-msg{color:green;font-size:14px;margin-bottom:10px;text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="form-box" style="margin-top:20px">
+<h2>Employee Registration</h2>
+
+<form id="regForm" method="POST" autocomplete="off" enctype="multipart/form-data">
+{% csrf_token %}
+
+<!-- FULL NAME -->
+<div class="input-group">
+<input type="text" name="name" id="username" placeholder="Full Name" required>
+<div class="error-msg" id="username-error"></div>
+</div>
+
+<!-- EMAIL -->
+<div class="input-group">
+<input type="email" name="email" id="email" placeholder="Email Address" required autocomplete='new-password'>
+<div class="error-msg" id="email-error"></div>
+</div>
+
+<!-- PHONE -->
+<div class="input-group">
+<input type="text" name="phno" id="phone" placeholder="Phone Number" maxlength="10" required>
+<div class="error-msg" id="phone-error"></div>
+</div>
+
+<!-- ADDRESS -->
+<div class="input-group">
+<textarea name="address" placeholder="Address" rows="3" required></textarea>
+</div>
+
+<!-- DEPARTMENT -->
+<div class="input-group">
+<select name="department" id="department" required>
+<option value="">Select Department</option>
+{% for dep in departments %}
+<option value="{{ dep.id }}">{{ dep.name }}</option>
+{% endfor %}
+</select>
+<div class="error-msg" id="department-error"></div>
+</div>
+
+<!-- PASSWORD -->
+<div class="input-group">
+<input type="password" name="pass" id="password" placeholder="Password" minlength="6" maxlength="20" required autocomplete='new-password'>
+<div class="error-msg" id="password-error"></div>
+</div>
+
+<!-- CONFIRM PASSWORD -->
+<div class="input-group">
+<input type="password" name="conpass" id="confirm" placeholder="Confirm Password" required>
+<div class="error-msg" id="confirm-error"></div>
+</div>
+
+<!-- IMAGE -->
+<div class="input-group">
+<input type="file" name="image" placeholder="Add Image" required>
+</div>
+
+<div style="margin-bottom: 20px; text-align: right; font-size: 14px;margin-right:140px">
+<span>Already registered? <a href="/" style="color: #4CAF50; text-decoration: none;">Login here</a></span>
+</div>
+
+<button type="submit" class="btn">Register</button>
+</form>
+</div>
+
+<script>
+// Username validation
+const username = document.getElementById("username");
+const usernameError = document.getElementById("username-error");
+username.addEventListener("input", () => {
+    const val = username.value;
+    if(val.length < 3) usernameError.textContent = "Username must be at least 3 characters";
+    else if(val.length > 30) usernameError.textContent = "Username cannot exceed 30 characters";
+    else if(/^\d/.test(val)) usernameError.textContent = "Username cannot start with a number";
+    else usernameError.textContent = "";
+});
+
+// Email validation
+const email = document.getElementById("email");
+const emailError = document.getElementById("email-error");
+email.addEventListener("input", () => {
+    const val = email.value;
+    const re = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    emailError.textContent = re.test(val) ? "" : "Enter a valid email";
+});
+
+// Phone validation
+const phone = document.getElementById("phone");
+const phoneError = document.getElementById("phone-error");
+phone.addEventListener("input", () => {
+    const val = phone.value;
+    if(!/^\d*$/.test(val)) phoneError.textContent = "Phone must contain digits only";
+    else if(val.length !== 10) phoneError.textContent = "Phone must be 10 digits";
+    else if(!['9','8','6'].includes(val[0])) phoneError.textContent = "Phone must start with 9, 8, or 6";
+    else phoneError.textContent = "";
+});
+
+// Department validation
+const department = document.getElementById("department");
+const departmentError = document.getElementById("department-error");
+department.addEventListener("change", () => {
+    departmentError.textContent = department.value ? "" : "Please select a department";
+});
+
+// Password validation
+const password = document.getElementById("password");
+const confirm = document.getElementById("confirm");
+const passwordError = document.getElementById("password-error");
+const confirmError = document.getElementById("confirm-error");
+
+password.addEventListener("input", () => {
+    if(password.value.length < 6) passwordError.textContent = "Password must be at least 6 characters";
+    else if(password.value.length > 20) passwordError.textContent = "Password cannot exceed 20 characters";
+    else passwordError.textContent = "";
+});
+
+confirm.addEventListener("input", () => {
+    confirmError.textContent = (confirm.value !== password.value) ? "Passwords do not match" : "";
+});
+
+// Final submit validation
+document.getElementById("regForm").addEventListener("submit", function(e){
+    if(usernameError.textContent || emailError.textContent || phoneError.textContent ||
+       passwordError.textContent || confirmError.textContent || departmentError.textContent){
+        e.preventDefault(); // prevent submit if any error
+        alert("Please fix all errors before submitting");
+    }
+});
+</script>
+
+</body>
+</html>
